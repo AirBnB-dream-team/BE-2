@@ -63,7 +63,7 @@ router.post("/register", validation.validateRegEntry, (req, res) => {
 });
 
 //Delete Account
-router.delete("/users/:id", (req, res) => {
+router.delete("/:id", (req, res) => {
   const id = req.params.id;
   db.remove(id)
     .then(user => {

@@ -8,7 +8,6 @@ exports.up = function(knex) {
       .unique();
 
     tbl.string("password", 255).notNullable();
-
     tbl
       .string("email", 255)
       .notNullable()
