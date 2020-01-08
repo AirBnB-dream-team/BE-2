@@ -1,12 +1,15 @@
 //Dependencies
 const router = require("express").Router();
-const jwt = require("jsonwebtoken");
 
 //Model for database
 const db = require("../schema/auth-router-model");
 
+//Validation
+const validation = require("../middleware/validation");
 //Hash
 const bcrypt = require("../utils/bcryptHash.js");
+//Token
+const jwt = require("../utils/jsonTokens");
 
 //Get all users
 router.get("/accounts", (req, res) => {
@@ -23,7 +26,6 @@ router.get("/accounts", (req, res) => {
 
 router.get("/accounts/:id", (req, res) => {
   const id = req.params.id;
-  // console.log(req.params)
   db.findById(id)
     .then(user => {
       if (user) {
@@ -37,8 +39,7 @@ router.get("/accounts/:id", (req, res) => {
     });
 });
 //Register new user
-router.post("/register", (req, res) => {
-  //TODO add the confirmUserEntry middleware here
+router.post("/register", validation.validateRegEntry, (req, res) => {
   let user = req.body;
   const pass = bcrypt.hash(user.password);
   user.password = pass;
@@ -48,12 +49,21 @@ router.post("/register", (req, res) => {
       res.status(201).json({ message: "Account Created Successfully", data });
     })
     .catch(error => {
-      res.status(500).json({ message: "Unable to connect to server" });
+      const { username, email } = req.body;
+      db.findByReg(username, email)
+        .then(user => {
+          if (user) {
+            res.status(404).json({ message: "Username or email exist" });
+          } else {
+            res.status(500).json({ message: "Unable to connect to server" });
+          }
+        })
+        .catch(error => res.status(500).json(error));
     });
 });
 
 //Delete Account
-router.delete("/delete/:id", (req, res) => {
+router.delete("/users/:id", (req, res) => {
   const id = req.params.id;
   db.remove(id)
     .then(user => {
@@ -70,13 +80,15 @@ router.delete("/delete/:id", (req, res) => {
 
 // Update Account
 
-router.put("/update/:id", (req, res) => {
-  //TODO add the confirmUserEntry middleware here
+router.put("/update/:id",validation.validateRegEntry, (req, res) => {
 
   const id = req.params.id;
-  const data = req.body;
+  let data = req.body;
+  const pass = bcrypt.hash(data.password);
+data.password=pass;
   db.findById(id).then(user => {
     if (user) {
+      
       db.update(id, data)
         .then(updated => {
           res
@@ -84,7 +96,9 @@ router.put("/update/:id", (req, res) => {
             .json({ message: "Account updated successfully", updated });
         })
         .catch(error => {
-          res.send({ message: "Unable to update info" });
+          res.send({
+            message: "Unable to update info username or email exist"
+          });
         });
     } else {
       res.status(404).json({ message: "User not found" });
@@ -92,4 +106,29 @@ router.put("/update/:id", (req, res) => {
   });
 });
 
+//Login
+router.post("/login", validation.validateInput, (req, res) => {
+  let { username, password } = req.body;
+
+  db.findBy({ username })
+    .then(user => {
+      if (!user) {
+        res.status(401).json({ message: "Invalid Credentials." });
+      } else {
+        if (bcrypt.unHash(user, password, user.password)) {
+          const token = jwt.signToken(user);
+
+          res.status(200).json({
+            message: `Welcome ${user.username}!`,
+            token
+          });
+        } else {
+          res.status(401).json({ message: "Invalid Credentials." });
+        }
+      }
+    })
+    .catch(error => {
+      res.status(500).json(error);
+    });
+});
 module.exports = router;

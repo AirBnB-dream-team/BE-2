@@ -5,7 +5,9 @@ module.exports = {
   remove,
   update,
   findAll,
-  findById
+  findBy,
+  findById,
+  findByReg
 };
 
 async function addUser(usersInfo) {
@@ -23,22 +25,36 @@ async function remove(id) {
   return removed;
 }
 
-async function update (id, changes){
+async function update(id, changes) {
+  await db("users")
+    .where({ id })
+    .update(changes);
 
-    await db('users')
-        .where({id})
-        .update(changes);
-
-        return findById(id);
+  const updated = await findById(id);
+  console.log(updated);
+  return updated;
 }
 
-async function findAll (){
-    let allUsers= await db('users').select("id", "username","email");
-    return allUsers;
+async function findAll() {
+  let allUsers = await db("users").select("id", "username", "email");
+  return allUsers;
 }
 
- function findById(id){
-     return db('users')
-     .where({id})
-     .first();
- }
+function findById(id) {
+  return db("users")
+    .where({ id })
+    .first();
+}
+async function findByReg(username,email) {
+  console.log(username,email)
+  let result = await db("users").where('username',username).orWhere('email',email).first();
+  console.log("expect",result)
+  return result? true:false
+}
+
+async function findBy(username) {
+  let result = await db("users").where(username).first();
+  console.log(result)
+  return result;
+}
+
