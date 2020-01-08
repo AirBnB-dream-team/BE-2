@@ -33,7 +33,7 @@ async function update (id, changes){
 }
 
 async function findAll (){
-    let allUsers= await db('users')
+    let allUsers= await db('users').select("id", "username","email");
     return allUsers;
 }
 
