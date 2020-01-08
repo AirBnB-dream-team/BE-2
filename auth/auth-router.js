@@ -12,7 +12,7 @@ const bcrypt = require("../utils/bcryptHash.js");
 const jwt = require("../utils/jsonTokens");
 
 //Get all users
-router.get("/accounts", (req, res) => {
+router.get("/", (req, res) => {
   db.findAll()
     .then(users => {
       res.status(200).json(users);
@@ -24,7 +24,7 @@ router.get("/accounts", (req, res) => {
 
 //findById ===> get a user by its ID
 
-router.get("/accounts/:id", (req, res) => {
+router.get("/:id", (req, res) => {
   const id = req.params.id;
   db.findById(id)
     .then(user => {
@@ -80,7 +80,7 @@ router.delete("/:id", (req, res) => {
 
 // Update Account
 
-router.put("/update/:id",validation.validateRegEntry, (req, res) => {
+router.put("/:id",validation.validateRegEntry, (req, res) => {
 
   const id = req.params.id;
   let data = req.body;
