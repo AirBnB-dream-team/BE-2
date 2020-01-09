@@ -5,7 +5,8 @@ module.exports = {
   removeListing,
   updateListing,
   findAllListing,
-  findById
+  findById,
+  findByUser
   //   findByReg
 };
 async function findAllListing() {
@@ -21,6 +22,12 @@ async function addListing(listingDetails) {
 function findById(id) {
   return db("listings")
     .where({ id })
+    .first();
+}
+
+function findByUser(id) {
+  return db("listings")
+    .where("user_id", "=", id)
     .first();
 }
 
