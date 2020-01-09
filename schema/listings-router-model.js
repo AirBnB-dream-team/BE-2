@@ -27,8 +27,8 @@ function findById(id) {
 
 function findByUser(id) {
   return db("listings")
-    .where("user_id", "=", id)
-    .first();
+    .where("user_id", "=", id);
+    
 }
 
 async function removeListing(id) {
