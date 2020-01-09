@@ -18,7 +18,7 @@ server.use(express.json()); // Node frame work to give back json format as promi
 
 //Route to different endpoints
 server.use("/api/auth", authRouter);
-server.use("/api/listings", authenticate, listingsRouter); //TODO work on the authenticate to verify tokens are genie
+server.use("/api/listings", authenticate, listingsRouter); 
 
 server.get('/', (req,res)=>{
     res.send(`<h1>"Hello You!, Checkout out the readMe on how to access different endpoints Cheers"</h1>`)
